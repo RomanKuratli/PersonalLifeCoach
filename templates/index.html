@@ -1,77 +1,12 @@
-{% macro flash_message(message, cls) -%}
-    <div class="alert alert-{{ cls }} alert-dismissible container-fluid">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        {{ message }}
-    </div>
-{%- endmacro %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-
-    <!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-    <!-- Popper JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
-
-    <!-- Latest compiled JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-    <title>PersonalLifeTrainer by Roman Kuratli</title>
-
-    <!-- Open iconic master-->
-    <link href="{{ url_for('static', filename="open-iconic-master/font/css/open-iconic-bootstrap.css") }}" rel="stylesheet">
-
-</head>
-<body>
-    <div class="jumbotron">
-        <h1>PersonalLifeCoach by Roman Kuratli</h1>
-    </div>
-    <div class="container-fluid" id="mainContainer">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="container-fluid row" id="log">
-                    {% for category, message in messages %}
-                        {% if category == "error" %}
-                            {{ flash_message(message, "danger") }}
-                        {% elif category == "success" %}
-                            {{ flash_message(message, "success") }}
-                        {% else %}
-                            {{ flash_message(message, "secondary") }}
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-              {% endif %}
-            {% endwith %}
-    </div>
+{% extends 'base.html' %}
+{% block content %}
     {% if quote %}
-    <div class="container card">
-        <div class="card-header"><h2>Motivierende Zitate</h2></div>
-        <div class="card-body">
-            <blockquote>
-                {{ quote.quote }}
-                <footer>
-                    - <cite>{{ quote.author }}</cite><br>
-                    Source: {{ quote.source }}
-                </footer>
-            </blockquote>
-        </div>
-    </div>
+    {% include 'modules/quotes_module.html' %}
     {% endif %}
-    <div class="container card ">
-        <div class="card-header"><h2>Positive Erlebnisse</h2></div>
-        <div class="card-body">
-            <blockquote>
-                {{ quote.quote }}
-                <footer>
-                    - <cite>{{ quote.author }}</cite><br>
-                    Source: {{ quote.source }}
-                </footer>
-            </blockquote>
-        </div>
-    </div>
-</body>
-</html>
+    {% include 'modules/diary_module.html' %}
+    <script>
+        window.onload = function() {
+            setNavigationPill("home");
+        }
+    </script>
+{% endblock %}

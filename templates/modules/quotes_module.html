@@ -1,0 +1,6 @@
+{% extends 'modules/module.html' %}
+{% import 'utils/quote_util.html' as quoto_util%}
+{% block title %}Motivierende Zitate{% endblock %}
+{% block content %}
+{{ quoto_util.format_qoute(quote) }}
+{% endblock %}

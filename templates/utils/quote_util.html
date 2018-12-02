@@ -1,0 +1,9 @@
+{% macro format_qoute(quote) -%}
+    <blockquote>
+    {{ quote.quote }}
+    <footer>
+        - <cite>{{ quote.author }}</cite><br>
+        Source: {{ quote.source }}
+    </footer>
+</blockquote>
+{%- endmacro %}

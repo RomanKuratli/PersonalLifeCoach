@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% import 'utils/quote_util.html' as quote_util%}
+{% block content %}
+<div class="container-fluid">
+    <h2>Zitatsammlung</h2>
+    {% for source, quotes in quotes_by_source.items() %}
+        <details>
+            <summary class="quote-source">{{ source }}</summary>
+            {% for quote in quotes %}
+                <div class="container card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-11">
+                                {{ quote_util.format_qoute(quote) }}
+                            </div>
+                            <div class="col-1">
+                                <form action="{{ url_for("delete_quote") }}" method="post">
+                                    <input type="hidden" value="{{ quote["_id"] }}" name="key" id="key">
+                                    <button type="submit"><span class="oi oi-delete"></span></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </details>
+    {% endfor %}
+</div>
+<script>
+    window.onload = function() {
+        setNavigationPill("quotes");
+    }
+</script>
+{% endblock %}

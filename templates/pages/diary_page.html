@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <h2>Tagebucheinträge</h2>
+    {% for diary_entry in diary %}
+    <div class="container card">
+        <div class="card-header"><strong>{{ diary_entry["entry_date"] | diary_date_format}}</strong></div>
+        <div class="card-body">
+            <ul>
+                {% for entry in diary_entry["entries"] %}
+                    <li>{{ entry|escape }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<script>
+    window.onload = function() {
+        setNavigationPill("diary");
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{%  extends 'modules/module.html' %}
+{% block title %}Positive Erlebnisse{% endblock %}
+{% block content %}
+    <h3>Neuen Eintrag erstellen</h3>
+    <form action="{{ url_for("insert_diary_entry") }}" method="post">
+        <div class="form-group">
+            <label for="entry_date">Datum:</label>
+            <input id="entry_date" class="form-control" type="date" name="entry_date">
+        </div>
+        <div class="form-group">
+            <label for="entries">Entr&auml;ge: (Bitte mind. 3 Einträge jeweils mit Return trennen)</label>
+            <textarea id="entries" class="form-control" type="date" name="entries"></textarea>
+        </div>
+        <input type="submit" value="Eintragen">
+    </form>
+    {% if good_day %}
+    <hr>
+    <h3>Erinnerst du dich noch?</h3>
+    <p>
+        <strong>{{ good_day["entry_date"] | diary_date_format}}</strong><br/>
+        <ul>
+            {% for entry in good_day["entries"] %}
+                <li>{{ entry }}</li>
+            {% endfor %}
+        </ul>
+    </p>
+    {% endif %}
+{% endblock %}
