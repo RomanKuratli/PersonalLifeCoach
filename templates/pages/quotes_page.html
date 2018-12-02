@@ -2,10 +2,34 @@
 {% import 'utils/quote_util.html' as quote_util%}
 {% block content %}
 <div class="container-fluid">
+    <h2>Zitat einf&uuml;gen</h2>
+    <form action="{{ url_for("insert_quote") }}" method="post">
+        <div class="form-group">
+            <label for="quote">Zitat:</label>
+            <textarea id="quote" class="form-control" name="quote" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="author">Author:</label>
+            <input id="author" class="form-control" type="text" name="author" required>
+        </div>
+        <div class="form-group">
+            <label for="source">Quelle:</label>
+            <input id="source" class="form-control" type="text" name="source" required>
+        </div>
+        <div class="form-group">
+            <label for="lang">Sprache:</label>
+            <select id="lang" name="lang" clas="form-control" required>
+                <option value="de">Deutsch</option>
+                <option value="en">Englisch</option>
+            </select>
+        </div>
+        <input type="submit" value="Erfassen">
+    </form>
+    <hr>
     <h2>Zitatsammlung</h2>
     {% for source, quotes in quotes_by_source.items() %}
         <details>
-            <summary class="quote-source">{{ source }}</summary>
+            <summary class="quote-source"><span class="oi oi-expand-down"></span> {{ source }}</summary>
             {% for quote in quotes %}
                 <div class="container card">
                     <div class="card-body">

@@ -58,6 +58,24 @@ def quotes():
     return render_template("pages/quotes_page.html", quotes_by_source=quotes_by_source)
 
 
+@app.route('/insert_quote', methods=["post"])
+def insert_quote():
+    try:
+        success = db.insert_quote(
+            request.form["quote"],
+            request.form["author"],
+            request.form["source"],
+            request.form["lang"]
+        )
+        if success:
+            flash("Zitat wurde erfolgreich aufgenommen", "success")
+        else:
+            flash("Zitat konnte nicht aufgenommen werden", "error")
+    except DuplicateKeyError:
+        flash("Dieses Zitat ist schon gespeichert", "error")
+    return redirect(url_for("quotes"))
+
+
 @app.route('/delete_quote', methods=["post"])
 def delete_quote():
     try:
