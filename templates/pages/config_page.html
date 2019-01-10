@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <h2>Konfiguration</h2>
+    <div class="container card">
+        <div class="card-header"><strong>Standort (f&uuml;r Wetterermittlung)</strong></div>
+        <div class="card-body">
+            {% if location %}
+                <p><strong>Zurzeit ausgew&auml;hlt: </strong>{{ location["city"] }}</p>
+                <hr>
+            {% endif %}
+            <form action="{{ url_for("set_location") }}" method="post">
+                <div class="form-group">
+                    <label for="country">Land:</label>
+                    <div id="countryAutocomplete" class="autocomplete container-fluid m-0 p-0">
+                        <input id="country" class="form-control" name="country" type="text">
+                    </div>
+                    <input id="alpha2_cd" name="alpha2_cd" type="hidden" onchange="onAlpha2CdChanged(this);">
+                    <label for="city">Stadt:</label>
+                    <div id="cityAutocomplete" class="autocomplete container-fluid m-0 p-0">
+                        <input id="city" class="form-control" name="city" type="text">
+                    </div>
+                    <input id="longitude" name="longitude" type="hidden">
+                    <input id="latitude" name="latitude" type="hidden">
+                </div>
+                <button id="setLocation" class="btn-primary" type="submit">Standort setzen</button>
+            </form>
+        </div>
+    </div>
+    <div class="container card">
+        <div class="card-header"><strong>Daten exportieren</strong></div>
+        <div class="card-body">
+            <form method="get" action="{{ url_for("export_data") }}">
+                <div class="form-group">
+                    {% for collection_display, collection in backup_collections %}
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="save_collections" value="{{ collection }}" id="cb_{{ collection }}">
+                          <label class="form-check-label" for="cb_{{ collection }}">{{ collection_display }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn-primary">Daten exportieren</button>
+            </form>
+        </div>
+    </div>
+    <div class="container card">
+        <div class="card-header"><strong>Daten importieren</strong></div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" action="{{ url_for("import_data") }}">
+                <div class="form-group">
+                    <input class="form-control-file" type="file" name="import" id="import">
+                    <label for="import">Import</label>
+                </div>
+                <button type="submit" class="btn-primary">Daten importieren</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    window.onload = function() {
+        setNavigationPill("config");
+        closeAutocompleteOnClick();
+
+        let cityField = document.getElementById("city");
+        let alpha2Field = document.getElementById("alpha2_cd");
+        setCountryAutocomplete(document.getElementById("country"), alpha2Field, cityField);
+        onAlpha2CdChanged(alpha2Field, cityField);
+
+        let latField = document.getElementById("latitude");
+        let longField = document.getElementById("longitude");
+        let setLocationButton = document.getElementById("setLocation");
+        setCityAutocomplete(alpha2Field, document.getElementById("city"), latField, longField, setLocationButton);
+        onLatLongChanged(latField, longField, setLocationButton);
+    }
+</script>
+{% endblock %}

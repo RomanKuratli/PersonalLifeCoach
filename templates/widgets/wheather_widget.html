@@ -1,0 +1,29 @@
+{% extends 'widgets/widget.html' %}
+{% block title %}Wetter{% endblock %}
+{% block content %}
+{% if location %}
+    <p><strong>Wetter f&uuml;r {{ location["city"] }}, {{ location["country"] }}:</strong></p>
+    {% if weather %}
+        <div class="container">
+            <div class="row">
+                <div class="col-2">Messzeit</div>
+                <div class="col-10">{{ weather["timestamp"] | weather_measure_date_format }}</div>
+            </div>
+            <div class="row">
+                <div class="col-2">Wetter</div>
+                <div class="col-4">{{ weather["weather"]}}</div>
+                <div class="col-4">{{ weather["weather_desc"] }}</div>
+                <div class="col-2"><img src="http://openweathermap.org/img/w/{{ weather["icon"] }}.png"> </div>
+            </div>
+            <div class="row">
+                <div class="col-2">Temperatur</div>
+                <div class="col-10">{{ weather["temp"]}} (Min: {{ weather["temp_min"] }}, Max: {{ weather["temp_max"] }})</div>
+            </div>
+        </div>
+    {% else %}
+        <p>Konnte Wetterdienst nicht erreichen. (Mehr Infos im Logfile)</p>
+    {% endif %}
+{% else %}
+    <p><em>Kein Aufenthaltsort festgelegt.</em></p>
+{% endif %}
+{% endblock %}

@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
     {% if quote %}
-    {% include 'modules/quotes_module.html' %}
+        {% include 'widgets/quotes_widget.html' %}
     {% endif %}
-    {% include 'modules/diary_module.html' %}
+    {% include 'widgets/diary_widget.html' %}
+    {% with location=location %}
+        {% include 'widgets/wheather_widget.html' %}
+    {% endwith %}
+    {% include 'widgets/activity_widget.html' %}
     <script>
         window.onload = function() {
             setNavigationPill("home");

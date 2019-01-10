@@ -1,15 +1,15 @@
-{% extends 'modules/module.html' %}
+{% extends 'widgets/widget.html' %}
 {% block title %}Positive Erlebnisse{% endblock %}
 {% block content %}
     <h3>Neuen Eintrag erstellen</h3>
     <form action="{{ url_for("insert_diary_entry") }}" method="post">
         <div class="form-group">
             <label for="entry_date">Datum:</label>
-            <input id="entry_date" class="form-control" type="date" name="entry_date">
+            <input id="entry_date" class="form-control" type="date" name="entry_date" required>
         </div>
         <div class="form-group">
             <label for="entries">Entr&auml;ge: (Bitte mind. 3 Einträge jeweils mit Return trennen)</label>
-            <textarea id="entries" class="form-control" type="date" name="entries"></textarea>
+            <textarea id="entries" class="form-control" rows="4" name="entries" required></textarea>
         </div>
         <input type="submit" value="Eintragen">
     </form>

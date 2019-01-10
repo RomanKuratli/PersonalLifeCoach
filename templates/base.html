@@ -21,41 +21,45 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <title>PersonalLifeTrainer by Roman Kuratli</title>
+    <title>PersonalLifeCoach by Roman Kuratli</title>
 
     <!-- Open iconic master-->
     <link href="{{ url_for('static', filename="open-iconic-master/font/css/open-iconic-bootstrap.css") }}" rel="stylesheet">
 
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm bg-dark fixed-top nav-pills">
-        <ul class="navbar-nav">
-            <li class="nav-item"><a id="home" class="nav-link" href="{{ url_for("index") }}">HOME</a></li>
-            <li class="nav-item"><a id= "diary" class="nav-link" href="{{ url_for("diary") }}">Tagebuch</a></li>
-            <li class="nav-item"><a id= "quotes" class="nav-link" href="{{ url_for("quotes") }}">Zitate</a></li>
-        </ul>
-    </nav>
+    {% include "nav.html" %}
     <div class="jumbotron">
-        <h1>PersonalLifeCoach by Roman Kuratli</h1>
-        <p><strong>T&auml;glich in kleinen Schritten zum Wohlbefinden</strong></p>
+        <div class="row">
+            <div class="col-lg-10">
+                <h1>PersonalLifeCoach by Roman Kuratli</h1>
+                <p><strong>T&auml;glich in kleinen Schritten zum Wohlbefinden</strong></p>
+            </div>
+            <div class="col-lg-2">
+                {% with size=150, background="#606060", outer_color="orange", inner_color="yellow" %}
+                    {% include 'logos/logo_color.svg' %}
+                {% endwith %}
+            </div>
+        </div>
     </div>
     <div class="container-fluid" id="mainContainer">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="container-fluid row" id="log">
-                    {% for category, message in messages %}
-                        {% if category == "error" %}
-                            {{ flash_message(message, "danger") }}
-                        {% elif category == "success" %}
-                            {{ flash_message(message, "success") }}
-                        {% else %}
-                            {{ flash_message(message, "secondary") }}
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-              {% endif %}
-            {% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container-fluid row" id="log">
+                {% for category, message in messages %}
+                    {% if category == "error" %}
+                        {{ flash_message(message, "danger") }}
+                    {% elif category == "success" %}
+                        {{ flash_message(message, "success") }}
+                    {% else %}
+                        {{ flash_message(message, "secondary") }}
+                    {% endif %}
+                {% endfor %}
+                </div>
+          {% endif %}
+        {% endwith %}
     </div>
     {% block content %}{% endblock %}
+    {% include "footer.html" %}
 </body>
 </html>

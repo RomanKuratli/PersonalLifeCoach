@@ -1,0 +1,18 @@
+<div class="container card module">
+    <div class="card-header"><h2>{% block title %}{% endblock %}</h2></div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-10">
+                {% block content %}
+                {% endblock %}
+            </div>
+            <div class="col-lg-2">
+                <div class="px-auto py-auto">
+                    {% with size=100, background="white", outer_color="darkgrey", inner_color="lightgrey" %}
+                        {% include 'logos/logo_grey.svg' %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

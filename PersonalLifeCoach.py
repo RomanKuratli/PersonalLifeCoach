@@ -1,26 +1,53 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from db import mongo_db as db
-import logging
-from pymongo.errors import DuplicateKeyError
-from datetime import datetime
 import locale
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask.json import dumps, loads, JSONDecoder
+from pymongo.errors import DuplicateKeyError
+from db import mongo_db as db
+from utils import logging, owm_client, activities as act_module
+from os import path
+from dateutil import parser
+
+
 app = Flask(__name__)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 locale.setlocale(locale.LC_ALL, 'de_DE')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-logger.addHandler(handler)
+COUNTRIES = db.get_countries()
+LOGGER = logging.get_logger("controller")
 
 
-#date format for diary entries
+# date format for diary entries
 def diary_date_format(date):
     return date.strftime("%A, %-d. %B. %Y")
 
 
+# date format for weather measures
+def weather_measure_date_format(datetime):
+    return datetime.strftime("%A, %-d. %B. %Y - %H:%M:%S")
+
+
 app.jinja_env.filters["diary_date_format"] = diary_date_format
+app.jinja_env.filters["weather_measure_date_format"] = weather_measure_date_format
 
 
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+
+def datetime_parser(dct):
+    for key, value in dct.items():
+        if isinstance(value, type("")) and "GMT" in value:
+            dct[key] = parser.parse(value)
+    return dct
+
+
+@app.route('/shutdown', methods=['POST'])
+def shutdown():
+    shutdown_server()
+    return 'Server shutting down...'
 # ---------------- index page functions ------------------------
 
 
@@ -28,17 +55,21 @@ app.jinja_env.filters["diary_date_format"] = diary_date_format
 def index():
     quote = db.get_random_quote()
     good_day = db.get_good_day_entry()
+    location = db.get_location()
+    owm_key = db.get_owm_key()
+    weather = owm_client.get_weather(owm_key, location["city"], location["alpha2_cd"]) if location and owm_key else None
     if not db.has_todays_diary_entry():
         flash("Für heute gibt es noch keinen Tagebucheintrag!", "error")
-    return render_template('index.html', quote=quote, good_day=good_day)
+    return render_template('index.html', quote=quote, good_day=good_day, location=location, weather=weather)
 
 
 @app.route('/insert_diary_entry', methods=["post"])
 def insert_diary_entry():
     try:
+        entries = [e for e in request.form["entries"].split("\r\n") if e]  # skip empty lines
         success = db.insert_diary_entry(
             datetime.strptime(request.form["entry_date"], "%Y-%m-%d"),
-            request.form["entries"].split("\r\n")
+            entries
         )
         if success:
             flash("Neuer Tagebucheintrag erfolgreich erstellt", "success")
@@ -92,6 +123,138 @@ def delete_quote():
 def diary():
     diary_entries = db.get_diary()
     return render_template("pages/diary_page.html", diary=diary_entries)
+
+# ---------------- diary page functions ------------------------
+
+
+@app.route('/activities', methods=["get"])
+def activities():
+    acts = db.get_activities()
+    return render_template("pages/activity_page.html", activities=acts)
+
+
+@app.route('/recommended_activities', methods=["get"])  # ajax path
+def recommended_activities():
+    act = act_module.get_recommended_activities(
+        int(request.args["mentalEnergy"]),
+        int(request.args["physicalEnergy"]),
+        request.args["timeAtDisposal"]
+    )
+    return jsonify(recommended_activities=act)
+
+
+@app.route('/insert_activity', methods=["post"])
+def insert_activity():
+
+    success = db.insert_activity(
+        int(request.form["mentalEnergy"]),
+        int(request.form["physicalEnergy"]),
+        request.form["timeRequired"],
+        True if "weatherRelevant" in request.form else False,
+        request.form["activity"]
+    )
+    if success:
+        flash("Aktivität erfolgreich eingefügt", "success")
+    else:
+        flash("Aktivität konnte nicht eingefügt werden", "error")
+    return redirect(url_for("activities"))
+
+
+@app.route('/delete_activity', methods=["post"])
+def delete_activity():
+    try:
+        db.delete_activity(request.form["key"])
+        flash("AKtivität erfolgreich gelöscht", "success")
+    except Exception:
+        flash("Aktivität konnte nicht gelöscht werden", "error")
+    return redirect(url_for("activities"))
+
+# ---------------- config page functions ------------------------
+
+
+@app.route('/config', methods=["get"])
+def config():
+    return render_template("pages/config_page.html",
+                           location=db.get_location(),
+                           backup_collections=db.BACKUP_COLLECTIONS)
+
+
+@app.route('/alpha2_cd')
+def alpha2_cd():
+    code = ""
+    inp = request.args.get('input')
+    for country in COUNTRIES:
+        if inp.upper() == country["country_name"].upper():
+            code = country["alpha2_cd"]
+    return jsonify(alpha2_cd=code)
+
+
+@app.route('/countries', methods=["get"])  # ajax path
+def countries():
+    inp = request.args.get('input')
+    suggestions = [country for country in COUNTRIES if inp in country["country_name"]]
+    return jsonify(suggestions=suggestions)
+
+
+@app.route('/city')  # ajax path
+def city():
+    inp = request.args.get('input')
+    country = request.args.get("country")
+    cty = db.get_city(country, inp)
+    if cty:
+        return jsonify(found=True, city=cty)
+    return jsonify(found=False)
+
+
+@app.route('/cities', methods=["get"])  # ajax path
+def cities():
+    inp = request.args.get('input')
+    country = request.args.get("country")
+    suggestions = db.get_cities(country, inp)
+    return jsonify(suggestions=suggestions)
+
+
+@app.route('/set_location', methods=["post"])
+def set_location():
+    db.set_location(
+        request.form["city"],
+        request.form["country"],
+        request.form["alpha2_cd"],
+        request.form["latitude"],
+        request.form["longitude"]
+    )
+    flash("Standort wurde erfolgreich angepasst", "success")
+    return redirect(url_for("config"))
+
+
+@app.route('/export_data', methods=["get"])
+def export_data():
+    save_collections = request.args.getlist("save_collections")
+    LOGGER.debug(f"export data: {save_collections}")
+    if save_collections:
+        path_name = path.join(path.dirname(path.abspath(__file__)), "static")
+        filename = path.join(path_name, "backup.json")
+        with open(filename, "w") as target:
+            buffer = {}
+            for coll_name in save_collections:
+                buffer[coll_name] = db.select_for_export(coll_name)
+            target.write(dumps(buffer))
+            return send_from_directory(path_name, "backup.json")
+    else:
+        flash("Mindestens eine Collection für das Backup muss angegeben werden", "error")
+        return redirect(url_for("config"))
+
+
+@app.route('/import_data', methods=["post"])
+def import_data():
+    file = request.files["import"]
+    content = file.read()
+    backup_json = loads(content, object_hook=datetime_parser)
+    if db.import_from_backup(backup_json):
+        flash("File erfolgreich importiert", "success")
+    else:
+        flash("Fehler beim Importieren der Datei", "error")
+    return redirect(url_for("config"))
 
 if __name__ == '__main__':
     app.run()

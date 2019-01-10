@@ -1,0 +1,41 @@
+{% extends 'widgets/widget.html' %}
+{% block title %}Aktivit&auml;ten{% endblock %}
+{% block content %}
+    <h3>Was willst du heute tun?</h3>
+    <form action="/will_be_prevented" method="post">
+        <div class="form-group">
+            <label for="mentalEnergy">Mentale Energie:</label>
+            <select id="mentalEnergy" class="form-control" name="mentalEnergy" required>
+                <option value="1">niedrig</option>
+                <option value="2">mittel</option>
+                <option value="3">hoch</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="physicalEnergy">K&ouml;rperliche Energie:</label>
+            <select id="physicalEnergy" class="form-control" name="physicalEnergy" required>
+                <option value="1">niedrig</option>
+                <option value="2">mittel</option>
+                <option value="3">hoch</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="timeAtDisposal">Ben&ouml;tigte Zeit:</label>
+            <input id="timeAtDisposal" class="form-control" type="time" name="timeAtDisposal" required>
+        </div>
+        <input id="getActivityBtn" type="submit" value="Vorschlag">
+    </form>
+    <hr>
+    <p><strong>Vorgeschlagene Aktivit&auml;ten</strong></p>
+    <p id="recommendedActivities"></p>
+    <script>
+        document.getElementById("getActivityBtn").addEventListener("click", function(event){
+            event.preventDefault();
+            let mentalEnergy = parseInt(document.getElementById("mentalEnergy").value);
+            let physicalEnergy = parseInt(document.getElementById("physicalEnergy").value);
+            let timeAtDisposal = document.getElementById("timeAtDisposal").value;
+            let activityDiv = document.getElementById("recommendedActivities");
+            getRecommendetActivities(mentalEnergy, physicalEnergy, timeAtDisposal, activityDiv);
+        });
+    </script>
+{% endblock %}

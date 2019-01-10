@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+{% set translate_energy = {1: "niedrig", 2: "mittel", 3: "hoch"} %}
+<div class="container-fluid">
+    <h2>Aktivit&auml;t einf&uuml;gen</h2>
+    <form action="{{ url_for("insert_activity") }}" method="post">
+        <div class="form-group">
+            <label for="activity">Aktivit&auml;t:</label>
+            <input id="activity" class="form-control" type="text" name="activity" required>
+        </div>
+        <div class="form-group">
+            <label for="mentalEnergy">Mentale Energie:</label>
+            <select id="mentalEnergy" class="form-control" name="mentalEnergy" required>
+                <option value="1">niedrig</option>
+                <option value="2">mittel</option>
+                <option value="3">hoch</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="physicalEnergy">K&ouml;rperliche Energie:</label>
+            <select id="physicalEnergy" class="form-control" name="physicalEnergy" required>
+                <option value="1">niedrig</option>
+                <option value="2">mittel</option>
+                <option value="3">hoch</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="timeRequired">Ben&ouml;tigte Zeit:</label>
+            <input id="timeRequired" class="form-control" type="time" name="timeRequired" required>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="weatherRelevant" value="weatherRelevant" id="weatherRelevant">
+            <label class="form-check-label" for="weatherRelevant">Ist das Wetter f&uuml;r diese Aktivit&auml;t relevant?</label>
+        </div>
+        <input type="submit" class="btn-primary" value="Erfassen">
+    </form>
+    <hr>
+    <h2>Aktivit&auml;ten</h2>
+    {% for act in activities %}
+        <div class="container card">
+            <div class="card-header">{{ act["activity"] }}</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-3">Mentale Energie:</div>
+                    <div class="col-2">{{ translate_energy[act["mental_energy"]] }}</div>
+                    <div class="col-3">Physische Energie:</div>
+                    <div class="col-2">{{ translate_energy[act["physical_energy"]] }}</div>
+                    <div class="col-1">
+                        <form action="{{ url_for("delete_activity") }}" method="post">
+                            <input type="hidden" value="{{ act["_id"] }}" name="key" id="key">
+                            <button type="submit"><span class="oi oi-delete"></span></button>
+                        </form>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3">Ben&ouml;tigte Zeit:</div>
+                    <div class="col-2">{{ act["time_required"] }}</div>
+                    <div class="col-3">Wetter relevant:</div>
+                    <div class="col-2">{% if act["weather_relevant"] %}Ja{% else %}Nein{% endif %}</div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+<script>
+    window.onload = function() {
+        setNavigationPill("activities");
+    }
+</script>
+{% endblock %}

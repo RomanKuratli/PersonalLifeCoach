@@ -23,3 +23,10 @@ mongodb-osx-x86_64-3.6.3/bin/mongod
 mongodb-osx-x86_64-3.6.3/bin/mongo
 mongodb-osx-x86_64-3.6.3/bin/install_compass
 mongodb-osx-x86_64-3.6.3/bin/bsondump
+static/log.txt
+*.pyc
+static/backup.json
+static/countries_deu_eng.html
+static/countries_deu_eng.html
+static/country_codes.html
+static/countries_deu_eng.html
