@@ -8,6 +8,35 @@ function setNavigationPill(linkId) {
     }
 }
 
+function getWeather(weatherArea) {
+    fetch("/weather")
+        .then(response => {return response.json();})
+        .then(json => {
+            weatherArea.innerHTML = `
+            <div class="row">
+                <div class="col-2">Messzeit</div>
+                <div class="col-10">${json["timestamp"]}</div>
+            </div>
+            <div class="row">
+                <div class="col-2">Wetter</div>
+                <div class="col-4">${json["weather"]}</div>
+                <div class="col-4">${json["weather_desc"] }</div>
+                <div class="col-2"><img src="http://openweathermap.org/img/w/${json["icon"]}.png"> </div>
+            </div>
+            <div class="row">
+                <div class="col-2">Temperatur</div>
+                <div class="col-10">${json["temp"]} (Min: ${json["temp_min"]}, Max: ${json["temp_max"]})</div>
+            </div>`;
+        })
+        .catch(error => {
+            console.error('error fetching /weather:', error);
+            weatherArea.innerHTML = "Error fetching weather: " + error;
+        });
+
+}
+
+
+
 //---- location ---------------------------------------------------
 
 function closeAllLists(input, elmnt) {
@@ -70,10 +99,8 @@ function setCountryAutocomplete(countryField, alpha2Field, cityField) {
         let url1 = "/alpha2_cd" + countryParam;
         console.log("fetch: " + url1);
         fetch(url1)
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(json) {
+        .then(response => {return response.json();})
+        .then(json => {
             let alpha2 = json["alpha2_cd"];
             console.log("answer: " + json);
             if(alpha2.length > 0) { // country is already filled in
@@ -83,10 +110,8 @@ function setCountryAutocomplete(countryField, alpha2Field, cityField) {
             } else { // country not entirely filled in, show dropdown list
                 let url2 = "/countries" + countryParam;
                 fetch(url2)
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(json) {
+                .then(response => {return response.json();})
+                .then(json => {
                     let countries = json["suggestions"];
                     if (countries.length > 0) {
                         let a = document.createElement("div");
@@ -94,7 +119,7 @@ function setCountryAutocomplete(countryField, alpha2Field, cityField) {
                         a.setAttribute("class", "autocomplete-items");
                         /*append the DIV element as a child of the autocomplete container:*/
                         document.getElementById("countryAutocomplete").appendChild(a);
-                        countries.forEach(function (country) {
+                        countries.forEach( country => {
                             createCountrySuggestionDiv(countryField, alpha2Field, a, country, cityField);
                         });
                     }
@@ -146,10 +171,8 @@ function setCityAutocomplete(alpha2Field, cityField, latField, longField, setLoc
         let url1 = "/city" + countryInputParam;
         console.log("fetch: " + url1);
         fetch(url1)
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(json) {
+        .then(response => {return response.json();})
+        .then(json => {
             if(json["found"]) { // city is already filled in
                 let city = json["city"];
                 latField.value = city["lat"];
@@ -159,10 +182,8 @@ function setCityAutocomplete(alpha2Field, cityField, latField, longField, setLoc
             } else { // country not entirely filled in, show dropdown list
                 let url2 = "/cities" + countryInputParam;
                 fetch(url2)
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(json) {
+                .then(response => {return response.json();})
+                .then(json => {
                     let cities = json["suggestions"];
                     if (cities.length > 0) {
                         let a = document.createElement("div");
@@ -180,7 +201,7 @@ function setCityAutocomplete(alpha2Field, cityField, latField, longField, setLoc
     });
 }
 
-function getRecommendetActivities(mentalEnergy, physicalEnergy, timeAtDisposal, activityDiv) {
+function getRecommendedActivities(mentalEnergy, physicalEnergy, timeAtDisposal, activityDiv) {
     console.log("getRecommendetActivities called:");
     console.log(mentalEnergy);
     console.log(physicalEnergy);
@@ -211,6 +232,33 @@ function getRecommendetActivities(mentalEnergy, physicalEnergy, timeAtDisposal, 
                 activityDiv.appendChild(ol);
             }
         });
+}
 
+function preventDefaults(event) {
+    event.preventDefault();
+    event.stopPropagation();
+}
+
+function highlight(area) {
+    area.classList.add("highlight");
+}
+
+function unhighlight(area) {
+    area.classList.remove("highlight");
+}
+//---- diary ---------------------------------------------------
+/* thanks to https://www.smashingmagazine.com/2018/01/drag-drop-file-uploader-vanilla-js/ */
+function createDragAndDropArea(area) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, preventDefaults)
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        area.addEventListener(eventName, e => {highlight(area)})
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, e => {unhighlight(area)})
+    });
 
 }

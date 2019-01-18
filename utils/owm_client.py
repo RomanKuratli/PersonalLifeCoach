@@ -9,6 +9,11 @@ CASHED_REQUEST = None  # Dict timestamp to json response
 LOGGER = logging.get_logger("owm_client")
 
 
+# date format for weather measures
+def weather_measure_date_format(dt):
+    return dt.strftime("%A, %-d. %B. %Y - %H:%M:%S")
+
+
 def kelvin_to_celsius(kelvin):
     return round(kelvin - 273.15, 2)
 
@@ -33,7 +38,7 @@ def get_weather(owm_key, city, alpha2_cd):
             json = response.json()
             CASHED_REQUEST = {
                 "city": city,
-                "timestamp": datetime.utcfromtimestamp(json["dt"]),
+                "timestamp": weather_measure_date_format(datetime.utcfromtimestamp(json["dt"])),
                 "weather_id": json["weather"][0]["id"],
                 "weather": json["weather"][0]["main"],
                 "weather_desc": json["weather"][0]["description"],

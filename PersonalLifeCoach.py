@@ -20,14 +20,7 @@ LOGGER = logging.get_logger("controller")
 def diary_date_format(date):
     return date.strftime("%A, %-d. %B. %Y")
 
-
-# date format for weather measures
-def weather_measure_date_format(datetime):
-    return datetime.strftime("%A, %-d. %B. %Y - %H:%M:%S")
-
-
 app.jinja_env.filters["diary_date_format"] = diary_date_format
-app.jinja_env.filters["weather_measure_date_format"] = weather_measure_date_format
 
 
 def shutdown_server():
@@ -56,11 +49,9 @@ def index():
     quote = db.get_random_quote()
     good_day = db.get_good_day_entry()
     location = db.get_location()
-    owm_key = db.get_owm_key()
-    weather = owm_client.get_weather(owm_key, location["city"], location["alpha2_cd"]) if location and owm_key else None
     if not db.has_todays_diary_entry():
         flash("Für heute gibt es noch keinen Tagebucheintrag!", "error")
-    return render_template('index.html', quote=quote, good_day=good_day, location=location, weather=weather)
+    return render_template('index.html', quote=quote, good_day=good_day, location=location)
 
 
 @app.route('/insert_diary_entry', methods=["post"])
@@ -79,6 +70,13 @@ def insert_diary_entry():
         flash("Zu diesem Datum ist schon ein Tagebucheintrag vorhanden!", "error")
     return redirect(url_for("index"))
 
+
+@app.route('/weather', methods=["get"])
+def weather():
+    location = db.get_location()
+    owm_key = db.get_owm_key()
+    weather = owm_client.get_weather(owm_key, location["city"], location["alpha2_cd"]) if location and owm_key else None
+    return jsonify(weather)
 
 # ---------------- quote page functions ------------------------
 
