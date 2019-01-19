@@ -36,9 +36,11 @@ def get_weather(owm_key, city, alpha2_cd):
         response = requests.get(owm_url, params=params)
         if response.status_code == 200:
             json = response.json()
+            tstamp = datetime.utcfromtimestamp(json["dt"])
             CASHED_REQUEST = {
                 "city": city,
-                "timestamp": weather_measure_date_format(datetime.utcfromtimestamp(json["dt"])),
+                "timestamp": tstamp,
+                "timestamp_display": weather_measure_date_format(tstamp),
                 "weather_id": json["weather"][0]["id"],
                 "weather": json["weather"][0]["main"],
                 "weather_desc": json["weather"][0]["description"],

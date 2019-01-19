@@ -11,8 +11,16 @@
             <label for="entries">Entr&auml;ge: (Bitte mind. 3 Einträge jeweils mit Return trennen)</label>
             <textarea id="entries" class="form-control" rows="4" name="entries" required></textarea>
         </div>
+        <div id="dropArea" class="form-group">
+            <p>Hier können per Drag and Drop Bilder zu den Tagebucheinträgen hochgeladen werden.</p>
+            <input id="dropInput" type="file" multiple accept="image/*" onchange="handleFiles(this.files)">
+        </div>
         <input type="submit" value="Eintragen">
     </form>
+    <script>
+    let dropArea = document.getElementById("dropArea");
+    createDragAndDropArea(dropArea);
+    </script>
     {% if good_day %}
     <hr>
     <h3>Erinnerst du dich noch?</h3>

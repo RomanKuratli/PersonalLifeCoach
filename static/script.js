@@ -15,7 +15,7 @@ function getWeather(weatherArea) {
             weatherArea.innerHTML = `
             <div class="row">
                 <div class="col-2">Messzeit</div>
-                <div class="col-10">${json["timestamp"]}</div>
+                <div class="col-10">${json["timestamp_display"]}</div>
             </div>
             <div class="row">
                 <div class="col-2">Wetter</div>
@@ -30,7 +30,7 @@ function getWeather(weatherArea) {
         })
         .catch(error => {
             console.error('error fetching /weather:', error);
-            weatherArea.innerHTML = "Error fetching weather: " + error;
+            weatherArea.innerHTML = "Wetterdienst konnte nicht erreicht werden";
         });
 
 }
@@ -245,6 +245,19 @@ function highlight(area) {
 
 function unhighlight(area) {
     area.classList.remove("highlight");
+}
+
+function handleFiles(files) {
+    // files is not an array but a FileList object
+  ([...files]).forEach(file => {
+
+  })
+}
+
+function handleDrop(event) {
+    let dt = event.dataTransfer;
+    let files = dt.files;
+    handleFiles(files);
 }
 //---- diary ---------------------------------------------------
 /* thanks to https://www.smashingmagazine.com/2018/01/drag-drop-file-uploader-vanilla-js/ */
