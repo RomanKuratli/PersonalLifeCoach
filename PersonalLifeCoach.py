@@ -254,5 +254,12 @@ def import_data():
         flash("Fehler beim Importieren der Datei", "error")
     return redirect(url_for("config"))
 
+
+# ---------------- thanks page ------------------------
+@app.route('/thanks')
+def thanks():
+    return render_template("pages/thanks.html")
+
+
 if __name__ == '__main__':
     app.run()

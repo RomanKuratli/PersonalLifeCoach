@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Danksagungen</h2>
+    <p>Dankbarkeit ist etwas vom Wichtigsten im Leben und ich will es hier nicht unterlassen, folgenden Personen/Teams
+    dankbar zu sein:</p>
+    <h3>Unterstützung</h3>
+    <dl>
+        <dt>Fabian Odoni</dt>
+        <dd>Für den ersten Input und weitere Tipps</dd>
+        <dt>Daniel Linder</dt>
+        <dd>Für wertvolle Inputs und Mutmacher</dd>
+    </dl>
+    <h3>Technologien</h3>
+    <p>Für folgende Technologien bin ich ebenfalls sehr dankbar:</p>
+    <dl>
+        <dt>Python</dt>
+        <dd>Eine wunderschöne Scriptsprache</dd>
+        <dt>Flask</dt>
+        <dd>Ein Webserver, so schlank er nur sein kann</dd>
+        <dt>MongoDB (mit pymongo)</dt>
+        <dd>Eine wunderbare flexible NoSQL-Datenbank</dd>
+        <dt>Bootstrap</dt>
+        <dd>Ein sehr leicht zu verwendendes CSS-Framework</dd>
+    </dl>
+    <script>
+        setNavigationPill("thanks");
+    </script>
+{% endblock %}
