@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% import 'utils/quote_util.html' as quote_util%}
 {% block content %}
-<div class="container-fluid">
     <h2>Zitat einf&uuml;gen</h2>
     <form action="{{ url_for("insert_quote") }}" method="post">
         <div class="form-group">
@@ -49,7 +48,6 @@
             {% endfor %}
         </details>
     {% endfor %}
-</div>
 <script>
     window.onload = function() {
         setNavigationPill("quotes");

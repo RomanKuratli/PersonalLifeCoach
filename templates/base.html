@@ -59,7 +59,9 @@
           {% endif %}
         {% endwith %}
     </div>
-    {% block content %}{% endblock %}
+    <div id="content" class="container-fluid">
+        {% block content %}{% endblock %}
+    </div>
     {% include "footer.html" %}
 </body>
 </html>

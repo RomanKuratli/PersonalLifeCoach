@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 {% set translate_energy = {1: "niedrig", 2: "mittel", 3: "hoch"} %}
-<div class="container-fluid">
     <h2>Aktivit&auml;t einf&uuml;gen</h2>
     <form action="{{ url_for("insert_activity") }}" method="post">
         <div class="form-group">
@@ -61,7 +60,6 @@
             </div>
         </div>
     {% endfor %}
-</div>
 <script>
     window.onload = function() {
         setNavigationPill("activities");
