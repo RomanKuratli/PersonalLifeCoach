@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+{% import "utils/picture_util.html" as picture_util %}
 {% block content %}
+    {{ picture_util.create_picture_modal() }}
     {% if quote %}
         {% include 'widgets/quotes_widget.html' %}
     {% endif %}

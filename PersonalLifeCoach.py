@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask.json import dumps, loads, JSONDecoder
 from pymongo.errors import DuplicateKeyError
 from db import mongo_db as db
-from utils import logging, owm_client, activities as act_module
+from utils import logger, owm_client, activities as act_module, diary_picture_manager
 from os import path
 from dateutil import parser
 
@@ -13,14 +13,20 @@ app = Flask(__name__)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 locale.setlocale(locale.LC_ALL, 'de_DE')
 COUNTRIES = db.get_countries()
-LOGGER = logging.get_logger("controller")
+LOGGER = logger.get_logger("controller")
 
 
 # date format for diary entries
 def diary_date_format(date):
     return date.strftime("%A, %-d. %B. %Y")
 
+
+def diary_gallery_id(date):
+    return f"gallery_{date.year}_{date.month}_{date.day}"
+
+
 app.jinja_env.filters["diary_date_format"] = diary_date_format
+app.jinja_env.filters["diary_gallery_id"] = diary_gallery_id
 
 
 def shutdown_server():
@@ -48,6 +54,8 @@ def shutdown():
 def index():
     quote = db.get_random_quote()
     good_day = db.get_good_day_entry()
+    if good_day:
+        good_day["pictures"] = diary_picture_manager.get_pictures_for_entry(good_day["entry_date"])
     location = db.get_location()
     if not db.has_todays_diary_entry():
         flash("Für heute gibt es noch keinen Tagebucheintrag!", "error")
@@ -71,12 +79,32 @@ def insert_diary_entry():
     return redirect(url_for("index"))
 
 
+@app.route('/upload_diary_picture', methods=["post"])  # ajax path
+def upload_diary_picture():
+    entry_date = datetime.strptime(request.form["entry_date"], "%Y-%m-%d")
+    picture = request.files["picture"]
+    if diary_picture_manager.add_picture(entry_date, picture):
+        return jsonify({"success": True, "pictures": diary_picture_manager.get_pictures_for_entry(entry_date)})
+    return jsonify({"success": False})
+
+
+@app.route('/delete_diary_picture', methods=["delete"])  # ajax path
+def delete_diary_picture():
+    url = request.form["url"]
+    filename = url[url.rfind("/") + 1:]
+    # extract the date from the file name
+    entry_date = datetime.strptime(filename[:filename.rfind("_")], "%Y_%m_%d")
+    if diary_picture_manager.delete_picture(filename):
+        return jsonify({"success": True, "pictures": diary_picture_manager.get_pictures_for_entry(entry_date)})
+    return jsonify({"success": False})
+
+
 @app.route('/weather', methods=["get"])
 def weather():
     location = db.get_location()
     owm_key = db.get_owm_key()
-    weather = owm_client.get_weather(owm_key, location["city"], location["alpha2_cd"]) if location and owm_key else None
-    return jsonify(weather)
+    weather_data = owm_client.get_weather(owm_key, location["city"], location["alpha2_cd"]) if location and owm_key else None
+    return jsonify(weather_data)
 
 # ---------------- quote page functions ------------------------
 
@@ -120,9 +148,12 @@ def delete_quote():
 @app.route('/diary', methods=["get"])
 def diary():
     diary_entries = db.get_diary()
+    # fetch the pictures for the diary entries
+    for entry in diary_entries:
+        entry["pictures"] = diary_picture_manager.get_pictures_for_entry(entry["entry_date"])
     return render_template("pages/diary_page.html", diary=diary_entries)
 
-# ---------------- diary page functions ------------------------
+# ---------------- activity page functions ------------------------
 
 
 @app.route('/activities', methods=["get"])

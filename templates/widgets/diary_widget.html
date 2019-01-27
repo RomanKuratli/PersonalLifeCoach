@@ -1,4 +1,5 @@
 {% extends 'widgets/widget.html' %}
+{% import 'utils/diary_util.html' as diary_util %}
 {% block title %}Positive Erlebnisse{% endblock %}
 {% block content %}
     <h3>Neuen Eintrag erstellen</h3>
@@ -8,29 +9,19 @@
             <input id="entry_date" class="form-control" type="date" name="entry_date" required>
         </div>
         <div class="form-group">
-            <label for="entries">Entr&auml;ge: (Bitte mind. 3 Einträge jeweils mit Return trennen)</label>
+            <label for="entries">Eintr&auml;ge: (Bitte mind. 3 Einträge jeweils mit Return trennen)</label>
             <textarea id="entries" class="form-control" rows="4" name="entries" required></textarea>
         </div>
-        <div id="dropArea" class="form-group">
-            <p>Hier können per Drag and Drop Bilder zu den Tagebucheinträgen hochgeladen werden.</p>
-            <input id="dropInput" type="file" multiple accept="image/*" onchange="handleFiles(this.files)">
+        {{ diary_util.create_drag_and_drop_area("field", "entry_date", "gallery") }}
+        <div class="border-top">
+            <p>Bilder:</p>
+            <div id="gallery" class="gallery"></div>
         </div>
         <input type="submit" value="Eintragen">
     </form>
-    <script>
-    let dropArea = document.getElementById("dropArea");
-    createDragAndDropArea(dropArea);
-    </script>
     {% if good_day %}
     <hr>
     <h3>Erinnerst du dich noch?</h3>
-    <p>
-        <strong>{{ good_day["entry_date"] | diary_date_format}}</strong><br/>
-        <ul>
-            {% for entry in good_day["entries"] %}
-                <li>{{ entry }}</li>
-            {% endfor %}
-        </ul>
-    </p>
+    {{ diary_util.format_diary_entry(good_day) }}
     {% endif %}
 {% endblock %}

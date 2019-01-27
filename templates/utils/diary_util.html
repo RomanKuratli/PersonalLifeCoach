@@ -1,0 +1,63 @@
+{% macro create_drag_and_drop_area(date_type, entry_date, gallery_id) -%}
+    {% if date_type == "field" %}
+        {% set date = entry_date %}
+    {% elif date_type == "value" %}
+        {% set date = entry_date.year|string + "-" + entry_date.month|string + "-" + entry_date.day|string %}
+    {% endif %}
+    {% set id = "dropArea_" + date %}
+    <div id="{{ id }}" class="form-group dropArea">
+        <p>Hier können per Drag and Drop Bilder zu den Tagebucheinträgen hochgeladen werden.</p>
+        <input id="dropInput" class="dropInput" type="file" multiple accept="image/*" onchange="handleFiles(this.files)">
+    </div>
+    <script>
+        window.addEventListener("load", (e) => {
+            let dropArea = document.getElementById("{{ id }}");
+            let gallery = document.getElementById("{{ gallery_id }}");
+            {% if date_type == "field" %}
+            let date = document.getElementById({{ entry_date }});
+            {% elif date_type == "value" %}
+            let date = "{{ entry_date }}";
+            {% endif %}
+            diaryPictureDragAndDrop(dropArea, "{{ date_type }}", "{{ date }}", gallery);
+        });
+
+    </script>
+{%- endmacro %}
+
+{% macro format_diary_entry(entry) -%}
+    <div class="container">
+    {% set gallery_id = entry["entry_date"] | diary_gallery_id %}
+        <div class="row">
+            <div class="col-9">
+                <strong>{{ entry["entry_date"] | diary_date_format}}</strong><br/>
+                <ul>
+                    {% for entry_item in entry["entries"] %}
+                        <li>{{ entry_item | escape }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-3">
+                {{ create_drag_and_drop_area("value", entry["entry_date"], gallery_id) }}
+            </div>
+        </div>
+        <div class="row border-top">
+            <div class="col-12">
+                <p>Bilder:</p>
+                <div id="{{ gallery_id }}" class="gallery">
+                    {% if entry["pictures"] %}
+                        <script>
+                        window.addEventListener("load", (e) => {
+                            let gallery = document.getElementById("{{ gallery_id }}");
+                            let pictures = [];
+                            {% for url in entry["pictures"] %}
+                                pictures.push("{{ url }}");
+                            {% endfor %}
+                            feedGallery(gallery, pictures);
+                        });
+                        </script>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{%- endmacro %}

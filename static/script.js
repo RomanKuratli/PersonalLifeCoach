@@ -213,11 +213,11 @@ function getRecommendedActivities(mentalEnergy, physicalEnergy, timeAtDisposal, 
             "&timeAtDisposal=" + timeAtDisposal;
     console.log("call " + url);
     fetch(url)
-        .then(function (response) {
+        .then(response => {
             console.log(response);
             return response.json();
         })
-        .then(function(json) {
+        .then(json => {
             console.log("json: " + json);
             let act = json["recommended_activities"];
             if (act.length == 0) {
@@ -247,21 +247,113 @@ function unhighlight(area) {
     area.classList.remove("highlight");
 }
 
-function handleFiles(files) {
-    // files is not an array but a FileList object
-  ([...files]).forEach(file => {
+function deletePicture(gallery, url) {
+    let formData = new FormData();
+    formData.append("url", url);
 
-  })
+    fetch("/delete_diary_picture", {method: "DELETE", body: formData})
+        .then(response => {return response.json();})
+        .then(json => {
+            if (json["success"]) {
+                if (gallery == null) alert("Bild wurde erfolgreich gelöscht");
+                else feedGallery(gallery, json["pictures"]);
+            }
+            else alert("Oops! Konnte File nicht hochladen");
+        })
+        .catch(error =>{
+            console.error("error in upload_diary_picture: " + error);
+            alert("Oops! Da ist etwas wirklich schief gegangen!");
+        })
+    ;
 }
 
-function handleDrop(event) {
+function createDeleteButton(gallery, url) {
+    let deleteBtn = document.createElement("button");
+    deleteBtn.className = "deleteBtn";
+    deleteBtn.addEventListener("click", e => {
+        deletePicture(gallery, url);
+    });
+    let deleteIcon = document.createElement("span");
+    deleteIcon.className = "oi oi-delete";
+    deleteBtn.appendChild(deleteIcon);
+    return deleteBtn;
+}
+
+function createCarouselButton(gallery, url) {
+    let carouselBtn = document.createElement("button");
+    carouselBtn.className = "carouselBtn";
+    carouselBtn.setAttribute("data-toggle", "modal");
+    carouselBtn.setAttribute("data-target", "#pictureModal");
+    carouselBtn.addEventListener("click", e => {
+        document.getElementById("modalPicture").setAttribute("src", url);
+    });
+    let carouselIcon = document.createElement("span");
+    carouselIcon.className = "oi oi-resize-both";
+    carouselBtn.appendChild(carouselIcon);
+    return carouselBtn;
+}
+
+function feedGallery(gallery, pictures) {
+    gallery.innerHTML = ""; // empty the gallery
+    pictures.forEach(url => {
+        let imgContainer = document.createElement("div");
+        imgContainer.className = "imageContainer";
+        let img = document.createElement("img");
+        img.setAttribute("src", url);
+        imgContainer.appendChild(img);
+        let deleteBtn = createDeleteButton(gallery, url);
+        let carouselBtn = createCarouselButton(gallery, url);
+        let buttons = [deleteBtn, carouselBtn];
+        buttons.forEach( btn => {
+            imgContainer.appendChild(btn);
+        });
+        imgContainer.addEventListener("mouseover", e => {
+            buttons.forEach( btn => {
+                btn.style.display = "block";
+            });
+        });
+        imgContainer.addEventListener("mouseout", e => {
+            buttons.forEach( btn => {
+                btn.style.display = "none";
+            });
+        });
+        gallery.appendChild(imgContainer);
+    });
+}
+
+function handleDrop(event, entry_date, gallery) {
+    if (entry_date == "") {
+        alert("Das Datum für den Tagebucheintrag muss ausgefüllt sein!");
+        return false;
+    }
     let dt = event.dataTransfer;
     let files = dt.files;
-    handleFiles(files);
+    // files is not an array but a FileList object
+    ([...files]).forEach(file => {
+        console.log("handle file");
+        console.log(file);
+        let formData = new FormData();
+        formData.append("entry_date", entry_date);
+        formData.append("picture", file);
+
+        fetch("/upload_diary_picture", {method: "POST", body: formData})
+            .then(response => {return response.json();})
+            .then(json => {
+                if (json["success"]) {
+                    if (gallery == null) alert("Bild wurde erfolgreich hochgeladen");
+                    else feedGallery(gallery, json["pictures"]);
+                }
+                else alert("Oops! Konnte File nicht hochladen");
+            })
+            .catch(error =>{
+                console.error("error in upload_diary_picture: " + error);
+                alert("Oops! Da ist etwas wirklich schief gegangen!");
+            });
+    })
 }
 //---- diary ---------------------------------------------------
 /* thanks to https://www.smashingmagazine.com/2018/01/drag-drop-file-uploader-vanilla-js/ */
-function createDragAndDropArea(area) {
+function diaryPictureDragAndDrop(area, dateType, date, gallery) {
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         area.addEventListener(eventName, preventDefaults)
     });
@@ -274,4 +366,6 @@ function createDragAndDropArea(area) {
         area.addEventListener(eventName, e => {unhighlight(area)})
     });
 
+    if (dateType == "field") date = date.value;
+    area.addEventListener("drop", e => {handleDrop(e, date, gallery)})
 }

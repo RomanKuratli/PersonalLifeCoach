@@ -1,7 +1,7 @@
 # returns a list of activities ranked with the best suited activity on top
 from db import mongo_db as db
-from utils import logging, owm_client
-LOGGER = logging.get_logger("activities")
+from utils import logger, owm_client
+LOGGER = logger.get_logger("activities")
 
 
 def get_minutes_from_time(time):

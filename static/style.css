@@ -1,30 +1,40 @@
-.jumbotron {background-color: #606060; color: yellow}
-.card {margin-bottom: 20px;}
-.quote-source {margin-bottom: 20px}
-.autocomplete {position: relative; display: inline-block}
+.jumbotron {
+    background-color: #606060;
+    color: yellow
+}
+.card {
+    margin-bottom: 20px;
+}
+.quote-source {
+    margin-bottom: 20px
+}
+.autocomplete {
+    position: relative;
+    display: inline-block
+}
 
 .autocomplete-items {
-  position: absolute;
-  border: 1px solid #d4d4d4;
-  border-bottom: none;
-  border-top: none;
-  z-index: 99;
-  /*position the autocomplete items to be the same width as the container:*/
-  top: 100%;
-  left: 0;
-  right: 0;
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
 }
 
 .autocomplete-items div {
-  padding: 10px;
-  cursor: pointer;
-  background-color: #fff;
-  border-bottom: 1px solid #d4d4d4;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid #d4d4d4;
 }
 
 .autocomplete-items div:hover {
-  /*when hovering an item:*/
-  background-color: #e9e9e9;
+    /*when hovering an item:*/
+    background-color: #e9e9e9;
 }
 
 #titlelogo {
@@ -35,4 +45,58 @@
 #footer svg {
   margin-left: auto;
   margin-right: auto;
+}
+
+.dropArea {
+    border: 2px dashed #ccc;
+    border-radius: 20px;
+    margin: 20px;
+    padding: 20px;
+}
+
+.highlight {
+    border-color: purple;
+}
+
+.dropInput {
+    display: none;
+}
+
+.gallery {
+    margin-top: 10px;
+}
+
+.gallery .imageContainer {
+    display: inline-block;
+    position: relative;
+    margin: 2px;
+    padding: 2px;
+    width: 150px;
+    vertical-align: middle;
+}
+
+.gallery .imageContainer .deleteBtn {
+    display: none;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+}
+
+.gallery .imageContainer .carouselBtn {
+    display: none;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+}
+
+.gallery .imageContainer img {
+    width: 100%;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    image-orientation: from-image;
+}
+
+#modalPicture {
+    width: 100%;
+    image-orientation: from-image;
 }

@@ -1,16 +1,12 @@
 {% extends 'base.html' %}
+{% import 'utils/diary_util.html' as diary_util %}
+{% import 'utils/picture_util.html' as picture_util %}
 {% block content %}
+    {{ picture_util.create_picture_modal() }}
     <h2>Tagebucheinträge</h2>
     {% for diary_entry in diary %}
     <div class="container card">
-        <div class="card-header"><strong>{{ diary_entry["entry_date"] | diary_date_format}}</strong></div>
-        <div class="card-body">
-            <ul>
-                {% for entry in diary_entry["entries"] %}
-                    <li>{{ entry|escape }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+        {{ diary_util.format_diary_entry(diary_entry) }}
     </div>
     {% endfor %}
 <script>

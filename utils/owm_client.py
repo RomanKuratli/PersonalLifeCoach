@@ -2,11 +2,11 @@ from datetime import datetime
 
 import requests
 
-from utils import logging
+from utils import logger
 
 owm_url = "https://api.openweathermap.org/data/2.5/weather"
 CASHED_REQUEST = None  # Dict timestamp to json response
-LOGGER = logging.get_logger("owm_client")
+LOGGER = logger.get_logger("owm_client")
 
 
 # date format for weather measures
