@@ -27,6 +27,24 @@
         </div>
     </div>
     <div class="container card">
+        <div class="card-header"><strong>Geburtstag (für Astro-Tool)</strong></div>
+        <div class="card-body">
+            <form action="{{ url_for("set_birthday") }}" method="post">
+                <div class="form-row form-group">
+                    <div class="col-md-6">
+                        <label for="bday_date">Geburtstag:</label>
+                        <input id="bday_date" class="form-control" name="bday_date" type="date">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bday_time">Geburtszeit:</label>
+                        <input id="bday_time" class="form-control" name="bday_time" type="time">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Geburtdatum setzen</button>
+            </form>
+        </div>
+    </div>
+    <div class="container card">
         <div class="card-header"><strong>Daten exportieren</strong></div>
         <div class="card-body">
             <form method="get" action="{{ url_for("export_data") }}">

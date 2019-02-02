@@ -1,10 +1,10 @@
 import locale
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
-from flask.json import dumps, loads, JSONDecoder
+from flask.json import dumps, loads
 from pymongo.errors import DuplicateKeyError
 from db import mongo_db as db
-from utils import logger, owm_client, activities as act_module, diary_picture_manager
+from utils import logger, owm_client, activities as act_module, diary_picture_manager, astro as astro_util
 from os import path
 from dateutil import parser
 
@@ -21,12 +21,17 @@ def diary_date_format(date):
     return date.strftime("%A, %-d. %B. %Y")
 
 
+def astro_date_format(dt):
+    return dt.strftime("%A, %-d. %B. %Y, %H:%M")
+
+
 def diary_gallery_id(date):
     return f"gallery_{date.year}_{date.month}_{date.day}"
 
 
 app.jinja_env.filters["diary_date_format"] = diary_date_format
 app.jinja_env.filters["diary_gallery_id"] = diary_gallery_id
+app.jinja_env.filters["astro_date_format"] = astro_date_format
 
 
 def shutdown_server():
@@ -52,14 +57,14 @@ def shutdown():
 
 @app.route('/')
 def index():
-    quote = db.get_random_quote()
+    params = {"quote": db.get_random_quote(), "location": db.get_config_property("location")}
     good_day = db.get_good_day_entry()
     if good_day:
         good_day["pictures"] = diary_picture_manager.get_pictures_for_entry(good_day["entry_date"])
-    location = db.get_location()
+        params["good_day"] = good_day
     if not db.has_todays_diary_entry():
         flash("Für heute gibt es noch keinen Tagebucheintrag!", "error")
-    return render_template('index.html', quote=quote, good_day=good_day, location=location)
+    return render_template('index.html', **params)
 
 
 @app.route('/insert_diary_entry', methods=["post"])
@@ -101,8 +106,8 @@ def delete_diary_picture():
 
 @app.route('/weather', methods=["get"])
 def weather():
-    location = db.get_location()
-    owm_key = db.get_owm_key()
+    location = db.get_config_property("location")
+    owm_key = db.get_config_property("owm_key")
     weather_data = owm_client.get_weather(owm_key, location["city"], location["alpha2_cd"]) if location and owm_key else None
     return jsonify(weather_data)
 
@@ -198,13 +203,33 @@ def delete_activity():
         flash("Aktivität konnte nicht gelöscht werden", "error")
     return redirect(url_for("activities"))
 
+# ---------------- astro page functions -------------------------
+
+
+@app.route('/astro', methods=["get"])
+def astro():
+    now = datetime.now()
+    eph_now = astro_util.get_ephemeris(now)
+    asp_now = astro_util.get_aspects(eph_now)
+    params = {"now": now, "eph_now": eph_now, "asp_now": asp_now}
+    birthday = db.get_config_property("birthday")
+    if birthday:
+        eph_bday = db.get_config_property("ephemeris")
+        params.update({
+            "birthday": birthday,
+            "eph_bday": eph_bday,
+            "asp_bday": db.get_config_property("aspects"),
+            "asp_transit": astro_util.get_transits(eph_bday, eph_now)
+
+        })
+    return render_template("pages/astro_page.html", **params)
 # ---------------- config page functions ------------------------
 
 
 @app.route('/config', methods=["get"])
 def config():
     return render_template("pages/config_page.html",
-                           location=db.get_location(),
+                           location=db.get_config_property("location"),
                            backup_collections=db.BACKUP_COLLECTIONS)
 
 
@@ -245,14 +270,26 @@ def cities():
 
 @app.route('/set_location', methods=["post"])
 def set_location():
-    db.set_location(
-        request.form["city"],
-        request.form["country"],
-        request.form["alpha2_cd"],
-        request.form["latitude"],
-        request.form["longitude"]
+    db.set_config_property("location", {
+        "city": request.form["city"],
+        "country": request.form["country"],
+        "alpha2_cd": request.form["alpha2_cd"],
+        "lat":  request.form["latitude"],
+        "long": request.form["longitude"]
+        }
     )
     flash("Standort wurde erfolgreich angepasst", "success")
+    return redirect(url_for("config"))
+
+
+@app.route('/set_birthday', methods=["post"])
+def set_birthday():
+    bday = datetime.strptime(f"{request.form['bday_date']}:{request.form['bday_time']}", "%Y-%m-%d:%H:%M")
+    db.set_config_property("birthday", bday)
+    flash("Geburtstag wurde erfolgreich gesetzt", "success")
+    eph = astro.get_ephemeris(bday)
+    db.set_config_property("ephemeris", eph)
+    db.set_config_property("aspects", astro.get_aspects(eph))
     return redirect(url_for("config"))
 
 

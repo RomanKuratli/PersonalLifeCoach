@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% import "utils/astro_util.html" as astro_util%}
+{% block content %}
+    <h2>Astrologie</h2>
+    <div class="container card">
+        <div class="card-header"><strong>Laufende Transite</strong></div>
+        <div class="card-body">
+            {% if birthday %}
+                {{ astro_util.format_aspect(asp_transit, 4) }}
+            {% else %}
+                <p>Bitte Geburtsdatum in der Konfiguration eingeben</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="container card">
+        <div class="card-header"><strong>Geburtshoroskop {% if birthday %}({{ birthday | astro_date_format }}){% endif %}</strong></div>
+        <div class="card-body">
+            {% if birthday %}
+                {{ astro_util.format_eph(eph_bday, 4) }}
+                <hr>
+                <p>Aspekte:</p>
+                {{ astro_util.format_aspect(asp_bday, 4) }}
+            {% else %}
+                <p>Bitte Geburtsdatum in der Konfiguration eingeben</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="container card">
+        <div class="card-header"><strong>Astrologisches "Wetter" {% if birthday %}({{ now | astro_date_format }}){% endif %}</strong></div>
+        <div class="card-body">
+            {{ astro_util.format_eph(eph_now, 4) }}
+            <hr>
+            <p>Aspekte:</p>
+            {{ astro_util.format_aspect(asp_now, 4) }}
+        </div>
+    </div>
+<script>
+    window.onload = function() {
+        setNavigationPill("astro");
+    }
+</script>
+{% endblock %}

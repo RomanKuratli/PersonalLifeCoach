@@ -100,3 +100,75 @@
     width: 100%;
     image-orientation: from-image;
 }
+
+.planet-fire {
+    color: red;
+}
+
+.planet-earth {
+    color: darkgoldenrod;
+}
+
+.planet-wind {
+    color: #9fcdff;
+}
+
+.planet-water {
+    color: #007bff;
+}
+
+.aspect, .planet {
+    box-shadow: 10px
+}
+
+.asp-konjunktion-acc-exact {
+    background-color: green;
+    color: white;
+}
+
+.asp-konjunktion-acc-high {
+    color: green;
+}
+
+.asp-konjunktion-acc-medium {
+    color: #00B000;
+}
+
+.asp-konjunktion-acc-low {
+    color: #00D000;
+}
+
+.asp-trigon-acc-exact, .asp-sextil-acc-exact {
+    background-color: blue;
+    color: white;
+}
+
+.asp-trigon-acc-high, .asp-sextil-acc-high {
+    color: blue;
+}
+
+.asp-trigon-acc-medium, .asp-sextil-acc-medium {
+    color: #007bff;
+}
+
+.asp-trigon-acc-low, .asp-sextil-acc-low {
+    color: #9fcdff;
+}
+
+.asp-opposition-acc-exact, .asp-sextil-quadrat-exact {
+    background-color: red;
+    color: white;
+}
+
+.asp-opposition-acc-high, .asp-quadrat-acc-high {
+    color: red;
+}
+
+.asp-opposition-acc-medium, .asp-quadrat-acc-medium {
+    color: orangered;
+}
+
+.asp-opposition-acc-low, .asp-quadrat-acc-low {
+    color: darkorange;
+}
+

@@ -1,0 +1,49 @@
+{% set elements = {1: "fire", 2: "earth", 3: "wind", 4: "water"} %}
+{% macro format_eph(eph, cols) -%}
+    {% set col_width = 12 // cols %}
+    {% for row in eph.items() | batch(cols) %}
+        <div class="row">
+        {% for planet, pos in row %}
+            <div class="col-md-{{ col_width }} planet planet-{{ elements[pos['element']] }} container">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-text"><strong>{{ planet }}</strong><br>
+                        Zeichen: {{ pos["sign"] }}<br>
+                        {{ pos["grad"] }}° {{ pos["mins"] }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% endfor %}
+{%- endmacro %}
+
+{% macro format_aspect(aspects,cols) -%}
+    {% set col_width = 12 // cols %}
+    {% for row in aspects | batch(cols, fill_with="filler") %}
+        <div class="row">
+            {% for asp in row %}
+                <div class="container col-md-{{ col_width }}">
+                    {% if asp != "filler" %}
+                        {% if asp["accuracy"] > 90 %}
+                            {% set accuracy = "acc-exact" %}
+                        {% elif asp["accuracy"] > 70 %}
+                            {% set accuracy = "acc-high" %}
+                        {% elif asp["accuracy"] > 40 %}
+                            {% set accuracy = "acc-medium" %}
+                        {% else %}
+                            {% set accuracy = "acc-low" %}
+                        {% endif %}
+                        <div class="card aspect asp-{{ asp["aspect"] | lower }}-{{ accuracy }}">
+                            <div class="card-body">
+                                <p class="card-text">{{ asp["planet"] }} {{ asp["aspect"] }} {{ asp["planet2"] }}<br>
+                                    Genauigkeit {{ asp["accuracy"] }}%</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+{%- endmacro %}
