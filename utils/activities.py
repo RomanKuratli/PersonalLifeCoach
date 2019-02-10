@@ -2,6 +2,18 @@
 from db import mongo_db as db
 from utils import logger, owm_client
 LOGGER = logger.get_logger("activities")
+"thunderstorm drizzle rain snow atmosphere clear few_clouds many_clouds"
+CONDITION = owm_client.WeatherCondition
+WEATHER_CONDITION_TO_SCORE = {
+    CONDITION.thunderstorm: 0,
+    CONDITION.drizzle: 30,
+    CONDITION.rain: 0,
+    CONDITION.snow: 0,
+    CONDITION.atmosphere: 80,
+    CONDITION.clear: 100,
+    CONDITION.few_clouds: 100,
+    CONDITION.many_clouds: 50
+}
 
 
 def get_minutes_from_time(time):
@@ -26,10 +38,12 @@ def get_score(act, mental_energy, physical_energy, time_at_disposal):
         LOGGER.debug(f"score for mental energy: {physical_score}")
         score += physical_score
     if act["weather_relevant"] and owm_client.get_cashed_weather():
-        #factors += 1
-        # weather = owm_client.get_cashed_weather()
-        # weather_s
-        pass
+        factors += 2
+        weather = owm_client.get_cashed_weather()
+        condition = owm_client.get_weather_condition_from_id(weather["weather_id"])
+        weather_score = WEATHER_CONDITION_TO_SCORE[condition]
+        LOGGER.debug(f"score for weather condition: {weather_score}")
+        score += weather_score
     percent_score = round(score / factors)
     LOGGER.debug(f"{score} / {factors} = {percent_score}")
     return percent_score

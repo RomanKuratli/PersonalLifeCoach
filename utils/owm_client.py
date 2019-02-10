@@ -1,10 +1,22 @@
 from datetime import datetime
+from enum import Enum
 
 import requests
 
 from utils import logger
 
 owm_url = "https://api.openweathermap.org/data/2.5/weather"
+WeatherCondition = Enum("WeatherCondition", "thunderstorm drizzle rain snow atmosphere clear few_clouds many_clouds")
+GROUP_TO_WEATHER_CONDITION = (
+    (200, 299, WeatherCondition.thunderstorm),
+    (300, 399, WeatherCondition.drizzle),
+    (500, 599, WeatherCondition.rain),
+    (600, 699, WeatherCondition.snow),
+    (700, 799, WeatherCondition.atmosphere),
+    (800, 800, WeatherCondition.clear),
+    (801, 802, WeatherCondition.few_clouds),
+    (803, 804, WeatherCondition.many_clouds)
+)
 CASHED_REQUEST = None  # Dict timestamp to json response
 LOGGER = logger.get_logger("owm_client")
 
@@ -21,6 +33,12 @@ def kelvin_to_celsius(kelvin):
 def get_cashed_weather():
     global CASHED_REQUEST
     return CASHED_REQUEST
+
+
+def get_weather_condition_from_id(weather_id):
+    for lower_bound, upper_bound, condition in GROUP_TO_WEATHER_CONDITION:
+        if lower_bound <= weather_id <= upper_bound:
+            return condition
 
 
 def get_weather(owm_key, city, alpha2_cd):
